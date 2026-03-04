@@ -343,8 +343,8 @@ npm run pre-push       # 提交前的完整检查
 
 ### 相关技能
 
-- `.evolution-skills/_git-commit/SKILL.md` - Git 提交规范
-- `.evolution-skills/_typescript-type-safety/SKILL.md` - TypeScript 类型安全
+- `.agent/skills/_git-commit/SKILL.md` - Git 提交规范
+- `.agent/skills/_typescript-type-safety/SKILL.md` - TypeScript 类型安全
 
 ---
 

@@ -1,0 +1,591 @@
+#!/bin/bash
+
+set -e
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+CLI_VERSION="2.0.0"
+
+# Project config file (in current directory)
+PROJECT_CONFIG_FILE=".evoskills-config.json"
+
+AGENTS_DIR=".agent"
+SKILLS_DIR="$AGENTS_DIR/skills"
+
+# Default skill repository
+DEFAULT_SKILLS_REPO="https://github.com/xingyu.wang/copilot-evolution-skills"
+
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+CORE_SKILLS=(
+  "_instruction-guard"
+  "_context-ack"
+  "_file-output-guard"
+  "_execution-precheck"
+  "_evolution-core"
+)
+
+OPTIONAL_SKILLS=(
+  "_git-commit"
+  "_pr-creator"
+  "_release-process"
+  "_code-health-check"
+  "_typescript-type-safety"
+  "_change-summary"
+  "_traceability-check"
+  "_session-safety"
+  "_skills-manager"
+)
+
+print_success() { echo -e "${GREEN}✅ $*${NC}"; }
+print_info() { echo -e "${BLUE}ℹ️  $*${NC}"; }
+print_warn() { echo -e "${YELLOW}⚠️  $*${NC}"; }
+print_error() { echo -e "${RED}❌ $*${NC}"; }
+
+show_help() {
+  cat << 'EOF'
+evoskills - Evolution Skills CLI
+
+Usage:
+  evoskills <command> [options]
+
+Commands:
+  init [OPTIONS]              Initialize project skills
+    --core-only               Install core required skills only
+    --skills <list>           Install selected skills (comma-separated)
+    --all                     Install all skills (default)
+    --repo <url>              Use custom skill repository (saved to .evoskills-config.json)
+
+  list [--installed]          List available or installed skills
+  install <skill>             Install a skill from configured repository
+  add <skill>                 Alias of install
+  remove <skill>              Remove a skill
+  update [OPTIONS]            Update CLI and refresh skills/constitution
+    --repo <url>              Switch to a different skill repository
+    [skill]                   Update specific skill only (omit to update all)
+  contribute <skill>          Start contribution flow for a skill
+  --version, -v               Print CLI version
+  --help, -h                  Print this help
+
+Default repository: https://github.com/xingyu.wang/copilot-evolution-skills
+
+Notes:
+  - Skills are installed to .agent/skills/
+  - Repository URL is auto-saved in .evoskills-config.json when using --repo
+  - 'update' without args refreshes CLI (via npm) and all skills from saved repo
+  - AGENTS.md is auto-generated for openskills compatibility
+EOF
+}
+
+ensure_layout() {
+  mkdir -p "$SKILLS_DIR"
+  mkdir -p ".github"
+}
+
+get_config_value() {
+  local key="$1"
+
+  # Return default if no config file exists
+  if [ ! -f "$PROJECT_CONFIG_FILE" ]; then
+    case "$key" in
+      skillsRepo) echo "$DEFAULT_SKILLS_REPO" ;;
+      *) echo "" ;;
+    esac
+    return
+  fi
+
+  # Try to read from config file
+  if command -v jq &> /dev/null; then
+    jq -r ".\"$key\" // empty" "$PROJECT_CONFIG_FILE" 2>/dev/null || echo ""
+  else
+    grep "\"$key\"" "$PROJECT_CONFIG_FILE" | sed 's/.*": "\(.*\)".*/\1/' || echo ""
+  fi
+}
+
+set_config_value() {
+  local key="$1"
+  local value="$2"
+
+  # Create empty config if it doesn't exist
+  if [ ! -f "$PROJECT_CONFIG_FILE" ]; then
+    echo "{}" > "$PROJECT_CONFIG_FILE"
+  fi
+
+  # Update config file
+  if command -v jq &> /dev/null; then
+    jq ".\"$key\" = \"$value\"" "$PROJECT_CONFIG_FILE" > "${PROJECT_CONFIG_FILE}.tmp" && mv "${PROJECT_CONFIG_FILE}.tmp" "$PROJECT_CONFIG_FILE"
+  else
+    # Fallback: simple sed replacement or append
+    if grep -q "\"$key\"" "$PROJECT_CONFIG_FILE"; then
+      sed -i '' "s/\"$key\": \"[^\"]*\"/\"$key\": \"$value\"/" "$PROJECT_CONFIG_FILE"
+    else
+      sed -i '' '$ s/}/,"'$key'": "'$value'"}/' "$PROJECT_CONFIG_FILE"
+    fi
+  fi
+
+  print_success "Config saved: $key = $value"
+}
+
+create_constitution_if_missing() {
+  if [ ! -f ".github/AI_CONSTITUTION.md" ]; then
+    local skills_repo
+    skills_repo=$(get_config_value "skillsRepo")
+
+    if curl -sf "$skills_repo/raw/main/.github/AI_CONSTITUTION.md" > ".github/AI_CONSTITUTION.md" 2>/dev/null; then
+      print_success "Downloaded .github/AI_CONSTITUTION.md"
+    else
+      cat > ".github/AI_CONSTITUTION.md" << 'EOF'
+# AI Constitution
+
+Please add your project constitution here or configure the skills repository URL.
+EOF
+      print_warn "Could not download constitution; created minimal .github/AI_CONSTITUTION.md"
+    fi
+  fi
+}
+
+create_execution_rules_if_missing() {
+  if [ ! -f ".github/EXECUTION_RULES.md" ]; then
+    local skills_repo
+    skills_repo=$(get_config_value "skillsRepo")
+
+    if curl -sf "$skills_repo/raw/main/.github/EXECUTION_RULES.md" > ".github/EXECUTION_RULES.md" 2>/dev/null; then
+      print_success "Downloaded .github/EXECUTION_RULES.md"
+    else
+      print_warn "Could not download execution rules (optional)"
+    fi
+  fi
+}
+
+create_copilot_instructions_if_missing() {
+  if [ ! -f ".github/copilot-instructions.md" ]; then
+    cat > ".github/copilot-instructions.md" << 'EOF'
+---
+applyTo: "**"
+---
+
+## Core Documents (Required)
+
+Please read and follow the AI evolution principle:
+- `.github/AI_CONSTITUTION.md` - Core evolution mechanism (always active, cannot be disabled)
+
+## Optional Execution Rules
+
+For additional safety guardrails, see:
+- `.github/EXECUTION_RULES.md` - 4 optional rules (can be disabled if not needed for your use case)
+
+## Skills Registry
+
+For available skills and how they work:
+- `AGENTS.md` - Skill registry with `_evolution-core` as the core skill
+
+---
+
+**Note**: The AI will continuously evolve by learning from errors, user feedback, and complex workflows. This is built into the core system and cannot be disabled.
+EOF
+    print_success "Created .github/copilot-instructions.md"
+  else
+    # Check if file already contains required references
+    local has_constitution=false
+    local has_execution=false
+    local has_agents=false
+    
+    if grep -q "AI_CONSTITUTION.md" ".github/copilot-instructions.md"; then
+      has_constitution=true
+    fi
+    
+    if grep -q "EXECUTION_RULES.md" ".github/copilot-instructions.md"; then
+      has_execution=true
+    fi
+    
+    if grep -q "AGENTS.md" ".github/copilot-instructions.md"; then
+      has_agents=true
+    fi
+    
+    # Append missing references
+    if [ "$has_constitution" = false ] || [ "$has_execution" = false ] || [ "$has_agents" = false ]; then
+      echo "" >> ".github/copilot-instructions.md"
+      echo "<!-- evoskills: auto-generated references -->" >> ".github/copilot-instructions.md"
+      
+      if [ "$has_constitution" = false ]; then
+        echo "- Please read and follow AI_CONSTITUTION.md (core evolution mechanism)" >> ".github/copilot-instructions.md"
+      fi
+      
+      if [ "$has_execution" = false ]; then
+        echo "- See EXECUTION_RULES.md for optional safety guardrails" >> ".github/copilot-instructions.md"
+      fi
+      
+      if [ "$has_agents" = false ]; then
+        echo "- Refer to AGENTS.md for skills registry" >> ".github/copilot-instructions.md"
+      fi
+      
+      print_success "Updated .github/copilot-instructions.md with evoskills references"
+    fi
+  fi
+}
+
+write_agents_registry() {
+  local installed_list
+  installed_list=$(find "$SKILLS_DIR" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; 2>/dev/null | sort)
+
+  # Generate our skills section in a temp file
+  local temp_content=".evoskills-section.tmp"
+  cat > "$temp_content" << 'MARKER_EOF'
+<!-- EVOSKILLS_START -->
+<skills_system priority="1">
+
+## Available Skills (evoskills)
+
+<!--
+SKILLS_TABLE_START -->
+<usage>
+When users ask you to perform tasks, check if any of the
+available skills below can help complete the task more effectively. Skills provide
+specialized capabilities and domain knowledge.
+
+How to use skills:
+- Invoke: Bash("npx openskills read <skill-name>")
+- The skill content will load with detailed instructions on how to complete the task
+- Base directory provided in output for resolving bundled resources (references/, scripts/, assets/)
+
+Usage notes:
+- Only use skills listed in <available_skills> below
+- Do not invoke a skill that is already loaded in your context
+- Each skill invocation is stateless
+</usage>
+
+<available_skills>
+
+MARKER_EOF
+
+  # Add installed skills
+  if [ -n "$installed_list" ]; then
+    while IFS= read -r skill; do
+      cat >> "$temp_content" << EOF
+<skill>
+<name>$skill</name>
+<description>Skill: $skill</description>
+<location>project</location>
+</skill>
+
+EOF
+    done <<< "$installed_list"
+  fi
+
+  cat >> "$temp_content" << 'MARKER_EOF'
+
+</available_skills>
+<!--
+SKILLS_TABLE_END -->
+
+</skills_system>
+<!-- EVOSKILLS_END -->
+MARKER_EOF
+
+  # Update or create AGENTS.md
+  if [ ! -f "AGENTS.md" ]; then
+    # Create new file
+    cat > "AGENTS.md" << 'EOF'
+# AGENTS
+
+EOF
+    cat "$temp_content" >> "AGENTS.md"
+    print_success "Created AGENTS.md"
+  else
+    # Check if our markers exist
+    if grep -q "<!-- EVOSKILLS_START -->" "AGENTS.md" && grep -q "<!-- EVOSKILLS_END -->" "AGENTS.md"; then
+      # Replace content between markers using sed
+      local agents_tmp="AGENTS.md.tmp"
+      
+      # Extract content before EVOSKILLS_START
+      sed -n '1,/<!-- EVOSKILLS_START -->/p' "AGENTS.md" | sed '$d' > "$agents_tmp"
+      
+      # Add our new content
+      cat "$temp_content" >> "$agents_tmp"
+      
+      # Extract content after EVOSKILLS_END
+      sed -n '/<!-- EVOSKILLS_END -->/,$p' "AGENTS.md" | tail -n +2 >> "$agents_tmp"
+      
+      mv "$agents_tmp" "AGENTS.md"
+      print_success "Updated evoskills section in AGENTS.md"
+    else
+      # Append our section to existing file
+      echo "" >> "AGENTS.md"
+      cat "$temp_content" >> "AGENTS.md"
+      print_success "Appended evoskills section to AGENTS.md"
+    fi
+  fi
+  
+  # Cleanup
+  rm -f "$temp_content"
+}
+
+install_skill_github() {
+  local skill="$1"
+  local skills_repo
+  skills_repo=$(get_config_value "skillsRepo")
+
+  if [ -d "$SKILLS_DIR/$skill" ]; then
+    print_warn "Skill already installed: $skill"
+    return 0
+  fi
+
+  mkdir -p "$SKILLS_DIR/$skill"
+
+  # Try to download SKILL.md and references from GitHub
+  if curl -sf "$skills_repo/raw/main/.agent/skills/$skill/SKILL.md" > "$SKILLS_DIR/$skill/SKILL.md" 2>/dev/null; then
+    print_success "Installed skill: $skill"
+
+    # Try to download references/ if present
+    if curl -sf "$skills_repo/raw/main/.agent/skills/$skill/references/" &>/dev/null; then
+      print_info "Downloading skill references..."
+      mkdir -p "$SKILLS_DIR/$skill/references"
+      # Download common reference files
+      for ref_file in "*.md"; do
+        curl -sf "$skills_repo/raw/main/.agent/skills/$skill/references/$ref_file" > "$SKILLS_DIR/$skill/references/$ref_file" 2>/dev/null || true
+      done
+    fi
+
+    # Try to download scripts/ if present
+    if curl -sf "$skills_repo/raw/main/.agent/skills/$skill/scripts/" &>/dev/null; then
+      print_info "Downloading skill scripts..."
+      mkdir -p "$SKILLS_DIR/$skill/scripts"
+      for script_file in "*.sh"; do
+        curl -sf "$skills_repo/raw/main/.agent/skills/$skill/scripts/$script_file" > "$SKILLS_DIR/$skill/scripts/$script_file" 2>/dev/null || true
+      done
+    fi
+  else
+    print_error "Failed to download skill: $skill from $skills_repo"
+    rm -rf "$SKILLS_DIR/$skill"
+    return 1
+  fi
+}
+
+cmd_init() {
+  local core_only=false
+  local skills=""
+  local install_all=true
+  local custom_repo=""
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --core-only)
+        core_only=true
+        install_all=false
+        shift
+        ;;
+      --skills)
+        skills="$2"
+        install_all=false
+        shift 2
+        ;;
+      --all)
+        install_all=true
+        shift
+        ;;
+      --repo)
+        custom_repo="$2"
+        set_config_value "skillsRepo" "$custom_repo"
+        shift 2
+        ;;
+      *)
+        print_error "Unknown option: $1"
+        exit 1
+        ;;
+    esac
+  done
+
+  ensure_layout
+
+  cat > "$PROJECT_CONFIG_FILE" << EOF
+{
+  "version": "1.1.0",
+  "installedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "skillsDir": ".agent/skills",
+  "openskillsCompatible": true,
+  "skillsRepo": "$(get_config_value 'skillsRepo')"
+}
+EOF
+
+  create_constitution_if_missing
+  create_execution_rules_if_missing
+  create_copilot_instructions_if_missing
+
+  print_info "Installing core skills..."
+  for skill in "${CORE_SKILLS[@]}"; do
+    install_skill_github "$skill"
+  done
+
+  if [ "$core_only" = false ]; then
+    if [ -n "$skills" ]; then
+      print_info "Installing selected skills..."
+      for skill in ${skills//,/ }; do
+        install_skill_github "$skill"
+      done
+    elif [ "$install_all" = true ]; then
+      print_info "Installing all optional skills..."
+      for skill in "${OPTIONAL_SKILLS[@]}"; do
+        install_skill_github "$skill"
+      done
+    fi
+  fi
+
+  write_agents_registry
+  print_success "Initialization complete (.agent/skills + AGENTS.md + AI_CONSTITUTION.md)"
+}
+
+cmd_list() {
+  local show_installed=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --installed) show_installed=true ;;
+    esac
+    shift
+  done
+
+  if [ "$show_installed" = true ]; then
+    if [ -d "$SKILLS_DIR" ]; then
+      find "$SKILLS_DIR" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort
+    else
+      print_warn ".agent/skills not found. Run: evoskills init"
+    fi
+    return
+  fi
+
+  echo "Core skills:"
+  for skill in "${CORE_SKILLS[@]}"; do
+    echo "  - $skill"
+  done
+
+  echo "Optional skills:"
+  for skill in "${OPTIONAL_SKILLS[@]}"; do
+    echo "  - $skill"
+  done
+}
+
+cmd_install() {
+  local skill="$1"
+  [ -z "$skill" ] && { print_error "Usage: evoskills install <skill>"; exit 1; }
+
+  ensure_layout
+  install_skill_github "$skill"
+  write_agents_registry
+}
+
+cmd_remove() {
+  local skill="$1"
+  [ -z "$skill" ] && { print_error "Usage: evoskills remove <skill>"; exit 1; }
+
+  case "$skill" in
+    _instruction-guard|_context-ack|_file-output-guard|_execution-precheck|_evolution-core)
+      print_error "Cannot remove core skill: $skill"
+      exit 1
+      ;;
+  esac
+
+  if [ -d "$SKILLS_DIR/$skill" ]; then
+    rm -rf "$SKILLS_DIR/$skill"
+    print_success "Removed skill: $skill"
+    write_agents_registry
+  else
+    print_warn "Skill is not installed: $skill"
+  fi
+}
+
+cmd_update() {
+  local skill=""
+  local custom_repo=""
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --repo)
+        custom_repo="$2"
+        set_config_value "skillsRepo" "$custom_repo"
+        shift 2
+        ;;
+      *)
+        if [[ ! "$1" =~ ^-- ]]; then
+          skill="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  # Update CLI itself if no specific skill requested
+  if [ -z "$skill" ]; then
+    if command -v npm &> /dev/null; then
+      print_info "Updating evoskills CLI..."
+      npm install -g @xingyu.wang/evoskills@latest 2>/dev/null || print_warn "CLI update failed (may need sudo or already latest)"
+    else
+      print_warn "npm not found; skipping CLI update"
+    fi
+  fi
+
+  ensure_layout
+  create_constitution_if_missing
+  create_execution_rules_if_missing
+  create_copilot_instructions_if_missing
+
+  if [ -n "$skill" ]; then
+    print_info "Refreshing skill: $skill"
+    rm -rf "$SKILLS_DIR/$skill"
+    install_skill_github "$skill"
+  else
+    print_info "Refreshing all skills from $(get_config_value 'skillsRepo')..."
+    # Refresh all installed skills
+    if [ -d "$SKILLS_DIR" ]; then
+      for installed_skill in "$SKILLS_DIR"/*; do
+        if [ -d "$installed_skill" ]; then
+          skill_name=$(basename "$installed_skill")
+          print_info "Updating $skill_name..."
+          rm -rf "$installed_skill"
+          install_skill_github "$skill_name"
+        fi
+      done
+    fi
+  fi
+
+  write_agents_registry
+  print_success "Update complete"
+}
+
+cmd_contribute() {
+  local skill="$1"
+  [ -z "$skill" ] && { print_error "Usage: evoskills contribute <skill>"; exit 1; }
+
+  if [ ! -d "$SKILLS_DIR/$skill" ]; then
+    print_error "Skill not found: $skill (expected in .agent/skills/)"
+    exit 1
+  fi
+
+  print_info "Contribution flow:"
+  print_info "1. Fork the repository"
+  print_info "2. Create a feature branch: git checkout -b feature/update-$skill"
+  print_info "3. Update skill in .agent/skills/$skill/"
+  print_info "4. Commit: git commit -m 'feat: update $skill'"
+  print_info "5. Push and open a pull request"
+}
+
+main() {
+  local command="$1"
+  shift || true
+
+  case "$command" in
+    init) cmd_init "$@" ;;
+    list) cmd_list "$@" ;;
+    install|add) cmd_install "$@" ;;
+    remove) cmd_remove "$@" ;;
+    update) cmd_update "$@" ;;
+    contribute) cmd_contribute "$@" ;;
+    --version|-v) echo "evoskills version $CLI_VERSION" ;;
+    --help|-h|help|"") show_help ;;
+    *) print_error "Unknown command: $command"; show_help; exit 1 ;;
+  esac
+}
+
+main "$@"

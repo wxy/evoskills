@@ -1,82 +1,176 @@
-# copilot-evolution-skills
+# evoskills
 
-> 通用 AI 助手技能库 + 进化宪法框架
+> Evolution Skills CLI - A modular, evolvable AI skills framework for GitHub Copilot
 
----
+[![npm version](https://img.shields.io/npm/v/@xingyu.wang/evoskills.svg)](https://www.npmjs.com/package/@xingyu.wang/evoskills)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## 🚀 集成方式（AI 执行）
+**evoskills** is a CLI tool and skill framework that enhances AI assistants (like GitHub Copilot) with modular, reusable capabilities. It provides a self-improving system through constitutional AI guidelines and pluggable skills.
 
-**用户说：**
-```
-请集成 https://github.com/wxy/copilot-evolution-skills 下的技能到本项目
-```
+## ✨ Features
 
-**AI 执行：**
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/wxy/copilot-evolution-skills/main/scripts/setup.sh)
-```
+- 🧩 **Modular Skills**: Install only the skills you need
+- 🔄 **Self-Improving**: Built-in evolution mechanism learns from mistakes
+- 🛡️ **Safe by Default**: Content protection prevents overwriting user customizations  
+- 📦 **openskills Compatible**: Works with standard openskills format
+- 🌐 **Extensible**: Create your own skill repositories
+- 🚀 **Zero Config**: Sensible defaults, auto-saves configuration
 
-**脚本自动完成：**
-- ✅ 添加 Git submodule 到 `.evolution-skills/`
-- ✅ 配置稀疏检出（仅下载 `skills/` 和 `constitution/`）
-- ✅ 更新 `.github/copilot-instructions.md`（添加进化宪法引用）
-- ✅ 自动提交变更
+## 📦 Installation
 
-**验证：**
-```bash
-git submodule status
-ls -la .evolution-skills/
-```
-
-**完成：**
-```bash
-git push
-```
-
----
-
-## 📋 包含内容
-
-### 技能库 (skills/)
-可复用的工程技能，覆盖：
-- Git 工作流（提交规范、PR 创建）
-- 代码质量（类型安全、健康检查）
-- 发布流程（完整的版本管理）
-- 进化能力（识别模式、沉淀技能）
-
-### 进化宪法 (constitution/)
-AI 系统的通用进化框架，独立于具体项目。
-
----
-
-## 🔄 更新技能
+### Option 1: Global Install (Recommended for regular use)
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/wxy/copilot-evolution-skills/main/scripts/update.sh)
+npm install -g @xingyu.wang/evoskills
 ```
 
-脚本会自动处理冲突（合并或衍合）。
-
----
-
-## 🤝 贡献技能
-
-如果你的项目产生了新技能或改进：
+Then use anywhere:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/wxy/copilot-evolution-skills/main/scripts/contribute.sh)
+evoskills --help
 ```
 
-脚本会创建 PR 到本仓库。
+### Option 2: Use with npx (No installation required)
 
----
+```bash
+npx @xingyu.wang/evoskills init
+```
 
-## 📝 许可证
+## 🚀 Quick Start
 
-MIT License
+Initialize evoskills in your project:
 
----
+```bash
+cd /path/to/your/project
+evoskills init
+```
 
-## 🙏 致谢
+This will:
+- ✅ Create `.agent/skills/` directory (skills installed from GitHub)
+- ✅ Generate `AGENTS.md` at project root (openskills-compatible skill registry)
+- ✅ Download `.github/AI_CONSTITUTION.md` (core evolution mechanism)
+- ✅ Download `.github/EXECUTION_RULES.md` (optional safety guardrails)
+- ✅ Create `.github/copilot-instructions.md` (entry point for the system)
+- ✅ Save configuration to `.evoskills-config.json`
 
-源于 [SilentFeed](https://github.com/wxy/SilentFeed)
+**Three-layer architecture:**
+1. **AI Constitution** - Evolution principles (always active, cannot be disabled)
+2. **Execution Rules** - 4 optional safety guardrails (can be removed if not needed)
+3. **Skills** - Reusable capabilities (5 core required, 9 optional)
+
+## 📚 Usage
+
+### List Available Skills
+
+```bash
+evoskills list                   # Show all available skills
+evoskills list --installed       # Show installed skills only
+```
+
+### Install/Remove Skills
+
+```bash
+evoskills install _git-commit    # Install a skill
+evoskills remove _git-commit     # Remove a skill
+```
+
+### Update Skills and CLI
+
+```bash
+evoskills update                 # Update CLI (via npm) and refresh all installed skills
+evoskills update _git-commit     # Update specific skill only
+```
+
+### Use Custom Skill Repository
+
+```bash
+evoskills init --repo https://github.com/your-username/your-skills-repo
+evoskills update --repo <url>    # Switch repository and update all skills
+```
+
+The repository URL is auto-saved to `.evoskills-config.json`.
+
+## 🎯 Available Skills
+
+The default repository provides 14 skills across 5 categories:
+
+### Core Skills (Required - Auto-installed)
+- `_instruction-guard` - Ensures project instructions are always read before responses
+- `_context-ack` - Formats responses with headers and reference lists
+- `_file-output-guard` - Prevents accidental file overwrites
+- `_execution-precheck` - Validates dependencies before executing commands
+- `_evolution-core` - Identifies improvement opportunities and proposes enhancements
+
+### Git & Version Control
+- `_git-commit` - Conventional commits workflow
+- `_pr-creator` - Automate PR generation
+
+### Release Management
+- `_release-process` - Complete release workflow
+
+### Code Quality
+- `_code-health-check` - Quality checks before commit
+- `_typescript-type-safety` - TypeScript type safety guidelines
+
+### Workflow & Automation
+- `_change-summary` - Summarize work sessions
+- `_traceability-check` - Ensure decisions are documented
+- `_session-safety` - Prevent state violations
+- `_skills-manager` - Manage skills lifecycle
+
+## 🛡️ User Content Protection
+
+evoskills intelligently preserves your customizations during updates:
+
+### AGENTS.md Protection
+- Managed region marked with `<!-- EVOSKILLS_START -->` and `<!-- EVOSKILLS_END -->`
+- Content outside markers is preserved (your custom skills, notes, etc.)
+- Updates only replace content between markers
+- If no markers exist, content is appended (never overwritten)
+
+### copilot-instructions.md Protection
+- New file: Creates standard template with required references
+- Existing file: Checks for `AI_CONSTITUTION.md` and `AGENTS.md` references
+- Only appends missing references, never overwrites existing content
+
+**Example**: You can safely add your own skill groups to `AGENTS.md` - evoskills updates won't touch them.
+
+## 📂 Project Structure
+
+This repository uses the same `.agent/skills/` structure it creates for users (dogfooding):
+
+```
+.agent/skills/          # Skill source definitions (14 skills)
+evoskills               # CLI entry point (npm bin)
+.github/
+  AI_CONSTITUTION.md    # Constitutional template
+AGENTS.md               # Skill registry (openskills format)
+package.json            # npm package metadata
+```
+
+When users install skills from GitHub, evoskills downloads from the `.agent/skills/` path.
+
+## 🤝 Contributing
+
+Contributions are welcome! See our [contribution guidelines](SKILL_DEFINITION_SPECIFICATION.md) for details.
+
+Quick contribution workflow:
+
+```bash
+git checkout -b feat/your-feature
+# Make your changes in .agent/skills/
+git commit -m "feat: add new skill"
+git push -u origin feat/your-feature
+# Create PR (with GitHub CLI)
+gh pr create --fill
+```
+
+## 📄 License
+
+MIT © [xingyu.wang](https://github.com/xingyu.wang)
+
+## 🔗 Links
+
+- [npm Package](https://www.npmjs.com/package/@xingyu.wang/evoskills)
+- [GitHub Repository](https://github.com/xingyu.wang/copilot-evolution-skills)
+- [Skill Definition Specification](SKILL_DEFINITION_SPECIFICATION.md)
