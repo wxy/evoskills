@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Validate package metadata
+        run: |
+          node -e "const p=require('./package.json'); if(!p.name||!p.version||!p.bin||!p.files){process.exit(1)}; console.log('package.json fields ok')"
+
+      - name: Validate semver version
+        run: |
+          node -e "const p=require('./package.json'); if(!/^\\d+\\.\\d+\\.\\d+(-[0-9A-Za-z-.]+)?$/.test(p.version)){throw new Error('Invalid semver: '+p.version)}; console.log('semver ok:', p.version)"
+
+      - name: Validate CLI version sync
+        run: |
+          CLI_VERSION=$(grep -E '^CLI_VERSION=' evoskills | sed -E 's/CLI_VERSION="([^"]+)"/\1/')
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          echo "CLI_VERSION=$CLI_VERSION"
+          echo "PKG_VERSION=$PKG_VERSION"
+          test "$CLI_VERSION" = "$PKG_VERSION"
+
+      - name: Validate shell script syntax
+        run: |
+          bash -n evoskills
+          chmod +x evoskills
+          ./evoskills --version
+          ./evoskills --help > /dev/null
+
+      - name: Validate npm package (dry-run)
+        run: |
+          npm pack --dry-run
+          npm publish --dry-run --access public
+
+      - name: Validate publish files list
+        run: |
+          node -e "const p=require('./package.json'); const required=['evoskills','README.md','LICENSE','.github/AI_CONSTITUTION.md','.github/EXECUTION_RULES.md']; for (const f of required){ if(!p.files.includes(f)) throw new Error('Missing from files[]: '+f);} console.log('files[] contains required publish artifacts')"
