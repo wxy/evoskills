@@ -21,6 +21,9 @@ jobs:
           node-version: 20
           registry-url: https://registry.npmjs.org
 
+      - name: Upgrade npm for OIDC support
+        run: npm install -g npm@latest
+
       - name: Verify release tag matches package version
         if: github.event_name == 'release'
         run: |
