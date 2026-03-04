@@ -6,6 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [2.1.0] - 2026-03-04
+
+### Changed
+- 🧭 **Skill Path Messaging Simplification**
+  - Updated `_evolution-core` to describe the canonical path directly as `.agent/skills/<skill>/SKILL.md`
+  - Removed wording that repeatedly referenced legacy path avoidance to reduce ambiguity
+- 🧱 **CLI Tier Model Alignment**
+  - `evoskills` now explicitly supports three tiers:
+    - Core (2): `_evolution-core`, `_skills-manager`
+    - Required System (4): `_instruction-guard`, `_context-ack`, `_file-output-guard`, `_execution-precheck`
+    - Optional (8): remaining workflow skills
+  - Added `init --required-only` (install Core + Required System)
+  - Updated `list` output to show all three tiers
+  - Updated `remove` guard to block both Core and Required System skills
+  - Updated AGENTS section generator to output tiered groups and richer skill descriptions
+
+### Fixed
+- ✅ **Config Version Consistency**
+  - `evoskills init` now writes project config version as `2.1.0`
+- ✅ **CLI Version Sync**
+  - Bumped CLI runtime version from `2.0.0` to `2.1.0`
+
+### Release
+- 📦 npm package version bumped to `2.1.0` (`@xingyu.wang/evoskills`)
+
+---
+
 ## [2.0.0] - 2026-03-04
 
 ### Added

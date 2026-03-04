@@ -3,7 +3,7 @@
 set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-CLI_VERSION="2.0.0"
+CLI_VERSION="2.1.0"
 
 # Project config file (in current directory)
 PROJECT_CONFIG_FILE=".evoskills-config.json"
@@ -21,11 +21,15 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 CORE_SKILLS=(
+  "_evolution-core"
+  "_skills-manager"
+)
+
+REQUIRED_SKILLS=(
   "_instruction-guard"
   "_context-ack"
   "_file-output-guard"
   "_execution-precheck"
-  "_evolution-core"
 )
 
 OPTIONAL_SKILLS=(
@@ -37,7 +41,6 @@ OPTIONAL_SKILLS=(
   "_change-summary"
   "_traceability-check"
   "_session-safety"
-  "_skills-manager"
 )
 
 print_success() { echo -e "${GREEN}✅ $*${NC}"; }
@@ -54,7 +57,8 @@ Usage:
 
 Commands:
   init [OPTIONS]              Initialize project skills
-    --core-only               Install core required skills only
+    --core-only               Install core skills only (2 skills)
+    --required-only           Install core + required system skills
     --skills <list>           Install selected skills (comma-separated)
     --all                     Install all skills (default)
     --repo <url>              Use custom skill repository (saved to .evoskills-config.json)
@@ -77,6 +81,7 @@ Notes:
   - Repository URL is auto-saved in .evoskills-config.json when using --repo
   - 'update' without args refreshes CLI (via npm) and all skills from saved repo
   - AGENTS.md is auto-generated for openskills compatibility
+  - Skill tiers: Core (2), Required System (4), Optional (8)
 EOF
 }
 
@@ -180,7 +185,7 @@ For additional safety guardrails, see:
 ## Skills Registry
 
 For available skills and how they work:
-- `AGENTS.md` - Skill registry with `_evolution-core` as the core skill
+- `AGENTS.md` - Skill registry with core, required system, and optional skills
 
 ---
 
@@ -228,8 +233,46 @@ EOF
 }
 
 write_agents_registry() {
-  local installed_list
-  installed_list=$(find "$SKILLS_DIR" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; 2>/dev/null | sort)
+  local is_installed
+  is_installed() {
+    [ -d "$SKILLS_DIR/$1" ]
+  }
+
+  local skill_description
+  skill_description() {
+    case "$1" in
+      _evolution-core) echo "Identify improvement opportunities and patterns in code and processes. Proposes enhancements based on architectural patterns and best practices. Core mechanism of continuous system evolution." ;;
+      _skills-manager) echo "Core skill manager for evoskills. Handles skill lifecycle (init, install, remove, update) and skill contributions. Core mechanism managing the skill ecosystem." ;;
+      _instruction-guard) echo "Read and apply directives before processing each request. Enforces instruction hierarchy and prevents instruction conflicts." ;;
+      _context-ack) echo "Format responses with clear headers, footers, and reference lists. Ensures proper context acknowledgment and response structure." ;;
+      _file-output-guard) echo "Validate and safeguard all file creation operations. Prevents unsafe file creation patterns and unauthorized modifications." ;;
+      _execution-precheck) echo "Validate dependencies and runtime requirements before executing commands. Ensures all prerequisites are met before task execution." ;;
+      _git-commit) echo "Implement conventional commits workflow. Ensures proper commit message formatting and semantic versioning compliance." ;;
+      _pr-creator) echo "Automate PR generation with version detection and release notes. Streamlines contributions and version management." ;;
+      _release-process) echo "Execute complete release workflow. Coordinates versioning, tagging, and publication of releases." ;;
+      _code-health-check) echo "Perform quality checks before commit. Validates code standards, security, and architectural consistency." ;;
+      _typescript-type-safety) echo "Enforce TypeScript type safety guidelines. Ensures proper typing and prevents type-related runtime errors." ;;
+      _change-summary) echo "Summarize completed work sessions. Provides concise summaries of changes and progress made." ;;
+      _traceability-check) echo "Ensure all decisions are properly documented. Validates decision traceability and documentation completeness." ;;
+      _session-safety) echo "Prevent state violations and session inconsistencies. Maintains context integrity and prevents conflicting actions." ;;
+      *) echo "Skill: $1" ;;
+    esac
+  }
+
+  local add_skill_entry
+  add_skill_entry() {
+    local skill="$1"
+    if is_installed "$skill"; then
+      cat >> "$temp_content" << EOF
+<skill>
+<name>$skill</name>
+<description>$(skill_description "$skill")</description>
+<location>project</location>
+</skill>
+
+EOF
+    fi
+  }
 
   # Generate our skills section in a temp file
   local temp_content=".evoskills-section.tmp"
@@ -259,21 +302,33 @@ Usage notes:
 
 <available_skills>
 
+<!-- Tier 1: Core Skills (2) - Evolution Infrastructure -->
+
 MARKER_EOF
 
-  # Add installed skills
-  if [ -n "$installed_list" ]; then
-    while IFS= read -r skill; do
-      cat >> "$temp_content" << EOF
-<skill>
-<name>$skill</name>
-<description>Skill: $skill</description>
-<location>project</location>
-</skill>
+  for skill in "${CORE_SKILLS[@]}"; do
+    add_skill_entry "$skill"
+  done
 
-EOF
-    done <<< "$installed_list"
-  fi
+  cat >> "$temp_content" << 'MARKER_EOF'
+
+<!-- Tier 2: System Skills (4) - Required for Safe Operation -->
+
+MARKER_EOF
+
+  for skill in "${REQUIRED_SKILLS[@]}"; do
+    add_skill_entry "$skill"
+  done
+
+  cat >> "$temp_content" << 'MARKER_EOF'
+
+<!-- Tier 3: Optional Skills (8) - User-Selectable Enhancements -->
+
+MARKER_EOF
+
+  for skill in "${OPTIONAL_SKILLS[@]}"; do
+    add_skill_entry "$skill"
+  done
 
   cat >> "$temp_content" << 'MARKER_EOF'
 
@@ -366,6 +421,7 @@ install_skill_github() {
 
 cmd_init() {
   local core_only=false
+  local required_only=false
   local skills=""
   local install_all=true
   local custom_repo=""
@@ -374,6 +430,11 @@ cmd_init() {
     case "$1" in
       --core-only)
         core_only=true
+        install_all=false
+        shift
+        ;;
+      --required-only)
+        required_only=true
         install_all=false
         shift
         ;;
@@ -402,7 +463,7 @@ cmd_init() {
 
   cat > "$PROJECT_CONFIG_FILE" << EOF
 {
-  "version": "1.1.0",
+  "version": "2.1.0",
   "installedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
   "skillsDir": ".agent/skills",
   "openskillsCompatible": true,
@@ -420,6 +481,13 @@ EOF
   done
 
   if [ "$core_only" = false ]; then
+    print_info "Installing required system skills..."
+    for skill in "${REQUIRED_SKILLS[@]}"; do
+      install_skill_github "$skill"
+    done
+  fi
+
+  if [ "$core_only" = false ] && [ "$required_only" = false ]; then
     if [ -n "$skills" ]; then
       print_info "Installing selected skills..."
       for skill in ${skills//,/ }; do
@@ -461,6 +529,11 @@ cmd_list() {
     echo "  - $skill"
   done
 
+  echo "Required system skills:"
+  for skill in "${REQUIRED_SKILLS[@]}"; do
+    echo "  - $skill"
+  done
+
   echo "Optional skills:"
   for skill in "${OPTIONAL_SKILLS[@]}"; do
     echo "  - $skill"
@@ -481,8 +554,8 @@ cmd_remove() {
   [ -z "$skill" ] && { print_error "Usage: evoskills remove <skill>"; exit 1; }
 
   case "$skill" in
-    _instruction-guard|_context-ack|_file-output-guard|_execution-precheck|_evolution-core)
-      print_error "Cannot remove core skill: $skill"
+    _evolution-core|_skills-manager|_instruction-guard|_context-ack|_file-output-guard|_execution-precheck)
+      print_error "Cannot remove core/required skill: $skill"
       exit 1
       ;;
   esac
