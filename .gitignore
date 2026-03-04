@@ -17,3 +17,4 @@ npm-debug.log*
 # 临时文件
 temp/
 tmp/
+*.local.md

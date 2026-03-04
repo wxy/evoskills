@@ -25,7 +25,20 @@ Usage notes:
 
 <available_skills>
 
-<!-- Core Skills (6) -->
+<!-- Tier 1: Core Skills (2) - Evolution Infrastructure -->
+<skill>
+<name>_evolution-core</name>
+<description>Identify improvement opportunities and patterns in code and processes. Proposes enhancements based on architectural patterns and best practices. Core mechanism of continuous system evolution.</description>
+<location>project</location>
+</skill>
+
+<skill>
+<name>_skills-manager</name>
+<description>Core skill manager for evoskills. Handles skill lifecycle (init, install, remove, update) and skill contributions. Core mechanism managing the skill ecosystem.</description>
+<location>project</location>
+</skill>
+
+<!-- Tier 2: System Skills (4) - Required for Safe Operation -->
 <skill>
 <name>_instruction-guard</name>
 <description>Read and apply directives before processing each request. Enforces instruction hierarchy and prevents instruction conflicts.</description>
@@ -50,19 +63,7 @@ Usage notes:
 <location>project</location>
 </skill>
 
-<skill>
-<name>_evolution-core</name>
-<description>Identify improvement opportunities and patterns in code and processes. Proposes enhancements based on architectural patterns and best practices.</description>
-<location>project</location>
-</skill>
-
-<skill>
-<name>_skills-manager</name>
-<description>Core skill manager for evoskills. Handles skill lifecycle (init, install, remove, update) and skill contributions.</description>
-<location>project</location>
-</skill>
-
-<!-- Optional Skills (8) -->
+<!-- Tier 3: Optional Skills (8) - User-Selectable Enhancements -->
 <skill>
 <name>_git-commit</name>
 <description>Implement conventional commits workflow. Ensures proper commit message formatting and semantic versioning compliance.</description>

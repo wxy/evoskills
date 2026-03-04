@@ -37,6 +37,44 @@ Without evolution, the AI repeats the same mistakes. With evolution, every error
 
 ---
 
+## Core Evolution Infrastructure
+
+The AI evolution mechanism relies on **two core skills** that are always active and non-negotiable:
+
+### 1. **_evolution-core** (Tier 1)
+- **Purpose**: Identifies improvement opportunities in code, processes, and workflows
+- **Responsibility**: Pattern recognition, root cause analysis, and improvement proposal
+- **Activation**: Triggered by errors, user feedback, or complex workflows
+- **Output**: Constitutional updates, new skills, or instruction refinements
+- **Critical**: This is the system's learning mechanism - without it, evolution cannot happen
+
+### 2. **_skills-manager** (Tier 1)
+- **Purpose**: Manages the complete skill lifecycle (init, install, remove, update)
+- **Responsibility**: Skill registry maintenance, dependency tracking, skill contributions
+- **Activation**: Triggered when new skills are created, modified, or removed
+- **Output**: Updated AGENTS.md, skill documentation, registry consistency
+- **Critical**: This is the system's knowledge infrastructure - without it, skills cannot be discovered or maintained
+
+### How They Work Together
+
+**Evolution Loop** in the AI system:
+
+```
+Error/Feedback → _evolution-core detects pattern
+                       ↓
+                Creates/improves skill
+                       ↓
+              _skills-manager registers it
+                       ↓
+         Skill becomes available for AI use
+                       ↓
+            Subsequent sessions benefit
+```
+
+These two skills form the **evolutionary backbone** of the system. All other skills exist to enhance specific workflows, but these two core skills enable the entire evolution mechanism itself.
+
+---
+
 ## Skill Modularity Principle
 
 **Key design decisions:**
