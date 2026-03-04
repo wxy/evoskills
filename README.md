@@ -56,7 +56,10 @@ This will:
 **Three-layer architecture:**
 1. **AI Constitution** - Evolution principles (always active, cannot be disabled)
 2. **Execution Rules** - 4 optional safety guardrails (can be removed if not needed)
-3. **Skills** - Reusable capabilities (5 core required, 9 optional)
+3. **Skills** - Reusable capabilities with 3 tiers:
+  - Core (2): always installed
+  - Required System (4): safety/runtime baseline
+  - Optional (8): user-selectable workflow skills
 
 ## 📚 Usage
 
@@ -65,6 +68,15 @@ This will:
 ```bash
 evoskills list                   # Show all available skills
 evoskills list --installed       # Show installed skills only
+```
+
+### Initialize by Tier
+
+```bash
+evoskills init                   # Install core + required + optional (default)
+evoskills init --core-only       # Install only core skills (2)
+evoskills init --required-only   # Install core + required system skills (6)
+evoskills init --skills _git-commit,_pr-creator  # Install selected optional skills
 ```
 
 ### Install/Remove Skills
@@ -92,31 +104,27 @@ The repository URL is auto-saved to `.evoskills-config.json`.
 
 ## 🎯 Available Skills
 
-The default repository provides 14 skills across 5 categories:
+The default repository provides 14 skills in a 3-tier model:
 
-### Core Skills (Required - Auto-installed)
-- `_instruction-guard` - Ensures project instructions are always read before responses
-- `_context-ack` - Formats responses with headers and reference lists
-- `_file-output-guard` - Prevents accidental file overwrites
-- `_execution-precheck` - Validates dependencies before executing commands
+### Tier 1: Core Skills (2)
 - `_evolution-core` - Identifies improvement opportunities and proposes enhancements
+- `_skills-manager` - Manages skill lifecycle (install/remove/update/contribute)
 
-### Git & Version Control
+### Tier 2: Required System Skills (4)
+- `_instruction-guard` - Ensures project instructions are applied before responses
+- `_context-ack` - Formats responses with clear context and references
+- `_file-output-guard` - Safeguards file operations and output behavior
+- `_execution-precheck` - Validates dependencies before execution
+
+### Tier 3: Optional Skills (8)
 - `_git-commit` - Conventional commits workflow
-- `_pr-creator` - Automate PR generation
-
-### Release Management
-- `_release-process` - Complete release workflow
-
-### Code Quality
-- `_code-health-check` - Quality checks before commit
-- `_typescript-type-safety` - TypeScript type safety guidelines
-
-### Workflow & Automation
-- `_change-summary` - Summarize work sessions
-- `_traceability-check` - Ensure decisions are documented
-- `_session-safety` - Prevent state violations
-- `_skills-manager` - Manage skills lifecycle
+- `_pr-creator` - PR generation workflow
+- `_release-process` - End-to-end release process
+- `_code-health-check` - Pre-commit quality checks
+- `_typescript-type-safety` - Type safety and mock patterns
+- `_change-summary` - Session change summarization
+- `_traceability-check` - Decision traceability checks
+- `_session-safety` - Session state consistency safeguards
 
 ## 🛡️ User Content Protection
 
