@@ -1,8 +1,96 @@
 # CHANGELOG
 
-所有对本项目的重要变更都会记录在此文件中。
+All notable changes to this project will be documented in this file.
 
-格式基于 [Keep a Changelog](https://keepachangelog.com/)，采用 [Semantic Versioning](https://semver.org/) 版本号。
+The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
+
+---
+
+## [2.0.0] - 2026-03-04
+
+### Added
+- 🏗️ **Three-Layer Architecture Model**
+  - Layer 1: AI Constitution - Pure evolution principles (66 lines)
+  - Layer 2: Execution Rules - 4 optional safety guardrails (105 lines)
+  - Layer 3: Modular Skills - 14 total (5 core + 9 optional)
+- 🌐 **Complete Internationalization to English**
+  - README.md - Professional English for npm registry
+  - AI_CONSTITUTION.md - Core evolution principles
+  - EXECUTION_RULES.md - Optional safety rules
+  - All technical documentation translated
+  - CLI templates and output messages standardized
+- 📦 **Official npm Registry Publication**
+  - Package: `@xingyu.wang/evoskills`
+  - Published to https://registry.npmjs.org/
+  - Verified installation and functionality in clean environment
+  - v1.1.0 deprecated with upgrade guidance
+- 📝 **Enhanced Documentation**
+  - docs/ARCHITECTURE_DECISIONS.md - Final architectural decisions
+  - docs/QUICK_DECISIONS.md - Quick reference for design choices
+  - docs/IMPLEMENTATION_CHECKLIST.md - Complete implementation status
+  - Updated docs/cli-usage.md with correct package names
+  - SKILLS.md - Comprehensive skill registry (14 skills detailed)
+
+### Changed
+- **Major Architecture Refactoring**
+  - Simplified AI Constitution from 292 lines → 66 lines (evolved = always active core only)
+  - Separated 4 execution rules into optional EXECUTION_RULES.md (users can delete)
+  - Project now self-bootstraps using `.agent/skills/` directory structure
+  - Smart content protection for user customizations (markers + append)
+- **CLI Evolution**
+  - Unified `evoskills update` (removed `--cli`, `--self` variants to prevent version drift)
+  - Enhanced `evoskills init` to download all three layers
+  - Added `create_execution_rules_if_missing()` function
+  - Version bumped from 1.1.0 → 2.0.0 in evoskills script
+- **NPM Package Configuration**
+  - Updated `files` array to include AI_CONSTITUTION.md and EXECUTION_RULES.md
+  - Specified `engines.node: >=18`
+  - Added `publishConfig.access: public` for transparency
+- **Skill Composition**
+  - Added 5 new system skills: _execution-precheck, _session-safety, _skills-manager, _traceability-check, _change-summary (previously under different structure)
+  - Confirmed all 14 skills functional and tested
+  - Updated AGENTS.md with skill registry (marker-protected for user content)
+
+### Fixed
+- ✅ **Repository Cleanup**
+  - Removed obsolete directories: cli/, constitution/, templates/, scripts/
+  - Cleaned up version.txt and other legacy files
+  - Consolidated npm configuration into single package.json
+- ✅ **npm Registry Issues**
+  - Reset registry from npmmirror.com (China mirror) → https://registry.npmjs.org/
+  - Fixed package.json `files` array to include essential documentation
+  - Verified package contents: 30.0 kB unpacked, 10.2 kB compressed, 6 files correct
+
+### Testing & Verification
+- ✅ Installation test passed: `npm install @xingyu.wang/evoskills@latest` in clean environment
+- ✅ CLI verification: `evoskills --version` → evoskills version 2.0.0
+- ✅ Functionality verification: `evoskills list` → All 14 skills correctly enumerated
+- ✅ Deprecation notice: v1.1.0 marked as deprecated with upgrade message
+
+### Breaking Changes
+- **Constitution is Mandatory**: `_evolution-core` cannot be disabled (design choice: always-on evolution)
+- **Three-Layer Model**: Execution rules are now optional and separate from constitution
+- **Package Name**: Changed from `@wxy/evoskills` → `@xingyu.wang/evoskills`
+- **CLI Consolidation**: Removed separate `update --cli` and `update --self` commands
+
+### Deprecated
+- 🚨 **Version 1.1.0 Deprecated** - Migrate to 2.0.0
+  - Old three-layer architecture not implemented
+  - English documentation incomplete
+  - npm publishing untested
+  - Please upgrade: `npm install -g @xingyu.wang/evoskills@latest`
+
+---
+
+## [1.1.0] - 2026-03-02
+
+### Added
+- 📦 Initial npm publication of evoskills CLI
+- 🎯 14 skills fully registered in AGENTS.md
+
+### Fixed
+- Repository structure for npm compatibility
+- Package metadata configuration
 
 ---
 
