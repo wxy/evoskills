@@ -10,6 +10,13 @@ description: Evolution capability meta-skill. Identifies evolutionary scenarios 
 - **Applicable Scenarios**: Repeated errors, user feedback indicating deviations, repetitive time-consuming or high-risk tasks.
 - **Learning Source**: Evolution constitution practice.
 
+### ⚡ Important Notice (v2.0.0+)
+**All skills are located in `.agent/skills/` directory.** The evolution process must respect this constraint:
+- When modifying or creating skills, always target `.agent/skills/<skill_name>/SKILL.md`
+- Do NOT use the legacy `skills/` path
+- The evoskills CLI fetches skills from `.agent/skills/` via GitHub raw content URLs
+- This applies to the source repository (copilot-evolution-skills) and all user projects
+
 ## 🔍 Trigger Conditions (Any one triggers)
 1. **Repeated Errors**: Same type of error appears in the same session or across multiple sessions.
 2. **User Feedback**: User explicitly indicates behavior doesn't meet expectations.
@@ -22,11 +29,13 @@ description: Evolution capability meta-skill. Identifies evolutionary scenarios 
 3. **Abstract**: Extract into reusable rules or processes.
 4. **Implement**:
    - If it's a universal rule → Update `.github/copilot-instructions.md` (constitution/guide level).
-   - If it's a reusable process → Create or improve skill file (`.agent/skills/.../SKILL.md`).
+   - If it's a reusable process → Create or improve skill file (**CRITICAL: v2.0.0+ always uses `.agent/skills/.../SKILL.md` path, never `skills/` directory**).
 5. **Register**:
    - Record in skill registry
    - Add skill definition to the `<project_skills>` section in `AGENTS.md` (see below)
 6. **Verify**: Apply the improvement in subsequent work and confirm the problem no longer recurs.
+
+⚠️ **Path Constraint (v2.0.0+)**: All skill modifications must target `.agent/skills/<skill>/SKILL.md` only. The legacy `skills/` directory is deprecated. Skills are fetched from `.agent/skills/` by the evoskills CLI via GitHub raw content URLs.
 
 ## 🤖 Auto-Evolution Requirements
 

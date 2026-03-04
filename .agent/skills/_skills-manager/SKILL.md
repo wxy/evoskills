@@ -61,19 +61,19 @@ evoskills list --installed
 
 约束：
 - 核心技能不可卸载
-- 安装来源为仓库 `skills/`，安装目标为用户项目 `.agent/skills/`
+- 安装来源为仓库 `.agent/skills/`，安装目标为用户项目 `.agent/skills/`（通过 GitHub raw content URL）
 
 ### 4. 贡献技能改进
 
 当用户希望贡献本地改进时：
 
 ```bash
-# 1) 先在仓库中修改 skills/<skill>/SKILL.md
+# 1) 先在仓库中修改 .agent/skills/<skill>/SKILL.md（v2.0.0+ 统一路径）
 git checkout -b feat/update-skill-manager
 
 # 2) 提交改动
 git add .
-git commit -m "docs(skills): migrate _skills-manager to evoskills workflow"
+git commit -m "docs(skills): improve _skills-manager skill"
 
 # 3) 推送并创建 PR
 git push -u origin feat/update-skill-manager
@@ -89,16 +89,19 @@ gh pr create --fill
 
 ### Q: 旧文档里还在引用 setup.sh / update.sh / contribute.sh 怎么办？
 
-A: 全部替换为 `evoskills init` / `evoskills update` / `evoskills contribute <skill>`。
+A: 全部替换为 `evoskills init` / `evoskills update` 命令。所有技能管理都通过 evoskills CLI 进行。
 
-### Q: 为什么仓库里是 `skills/`，用户项目里是 `.agent/skills/`？
+### Q: v2.0.0 中为什么所有技能都在 `.agent/skills/` 而没有分离的源目录？
 
-A: `skills/` 是发布源目录，`.agent/skills/` 是安装目录。两者分离可以同时满足：
-- npm 发包结构稳定
-- 用户项目隔离安装
-- openskills 入口发现（根 `AGENTS.md`）
+A: v2.0.0 统一了架构，所有技能都在 `.agent/skills/` 中，包括：
+- 源仓库（copilot-evolution-skills）中的技能
+- 用户项目中安装的技能
 
-### Q: 如何检查当前技能安装状态？
+evoskills CLI 通过 GitHub raw content URL 直接从 `.agent/skills/` 拉取技能，简化了架构。
+
+### Q: 如何确保演进改进应用到正确的路径？
+
+A: `_evolution-core` 技能已被更新，明确要求所有改进必须在 `.agent/skills/<skill>/SKILL.md` 中进行。遵循此约束可避免路径混淆。### Q: 如何检查当前技能安装状态？
 
 ```bash
 evoskills list --installed
@@ -107,10 +110,11 @@ cat AGENTS.md
 
 ## 最佳实践
 
-- 发布源统一维护在仓库 `skills/`
-- 用户项目只读写 `.agent/skills/`
+- 所有技能统一维护在 `.agent/skills/` 目录（v2.0.0+）
+- 遵循 evoskills CLI 的 GitHub raw content 获取机制
 - 技能入口固定在项目根 `AGENTS.md`
 - 宪法固定在 `.github/AI_CONSTITUTION.md`
+- 所有演进改进必须在 `.agent/skills/<skill>/SKILL.md` 中进行（不使用遗留的 `skills/` 路径）
 
 ## 技术说明
 
