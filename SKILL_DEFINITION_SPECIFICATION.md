@@ -8,25 +8,77 @@
 
 ## 元数据区（YAML Front Matter）
 
+> 注：本规范从 v1.1.0 开始支持扩展元数据，用于 evoskills CLI 工具
+
 ```yaml
 ---
+# 基础信息（必需）
 name: <skill-name>
 description: <brief description>
+author: <author-name>
 tier: [1|2|3]
-# Tier 1: 强制执行（每次回复必须）
-# Tier 2: 条件强制（自动触发，无需用户请求）
-# Tier 3: 显式请求（仅用户明确要求时）
+
+# 新增字段（v1.1.0+）
+version: <semantic version>          # 技能版本号
+category: <git|code-quality|meta|...> # 技能分类
+required: [true|false]               # 是否为核心必备技能？
+externalDeps:                        # 依赖的外部命令行程序
+  - git (>=2.0)
+  - node (>=16)
+tags:                                # 搜索标签
+  - keyword1
+  - keyword2
 ---
 ```
 
-**示例**：
+**基础示例**：
 ```yaml
 ---
-name: _evolution-core
-description: 进化能力元技能。识别重复错误/用户反馈/复杂工作流，提议改进并询问用户确认
-tier: 2
+name: _instruction-guard
+description: 强制在每次回复前读取项目指令文件
+author: wxy
+tier: 1
+version: 1.0.0
+category: meta
+required: true
+tags:
+  - instruction
+  - guard
 ---
 ```
+
+**完整示例**（_git-commit）：
+```yaml
+---
+name: _git-commit
+description: Git conventional commit with enforcement
+author: wxy
+tier: 2
+version: 1.2.0
+category: git
+required: false
+externalDeps:
+  - git (>=2.0)
+tags:
+  - git
+  - workflow
+  - commit
+---
+```
+
+### 字段说明
+
+| 字段 | 类型 | 必需 | 说明 |
+|------|------|------|------|
+| `name` | String | ✅ | 技能唯一标识符（kebab-case，以 `_` 开头） |
+| `description` | String | ✅ | 一行简短描述，用于列表显示 |
+| `author` | String | ✅ | 技能作者（v1.1.0+ 新增） |
+| `tier` | Integer (1-3) | ✅ | 执行优先级 |
+| `version` | String | ✅ | 技能版本（语义化版本 SemVer format） |
+| `category` | String | ✅ | 分类：`meta`, `git`, `code-quality`, `release`, `workflow` 等 |
+| `required` | Boolean | ✅ | 是否为核心必装技能（v1.1.0+ 新增） |
+| `externalDeps` | Array | ❌ | 外部依赖列表，格式：`<command> (version spec)` |
+| `tags` | Array | ❌ | 用于搜索和分类的标签集合 |
 
 ---
 
@@ -256,9 +308,9 @@ C) 都不采取（记录此评估但暂不行动）
 ## 📝 完整示例
 
 请参考以下技能文件作为参考：
-- [_execution-precheck](../.evolution-skills/skills/_execution-precheck/SKILL.md)
-- [_evolution-core](../.evolution-skills/skills/_evolution-core/SKILL.md)
-- [_context-ack](../.evolution-skills/skills/_context-ack/SKILL.md)
+- [_execution-precheck](.agent/skills/_execution-precheck/SKILL.md)
+- [_evolution-core](.agent/skills/_evolution-core/SKILL.md)
+- [_context-ack](.agent/skills/_context-ack/SKILL.md)
 
 ---
 

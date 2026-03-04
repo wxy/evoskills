@@ -1,0 +1,26 @@
+{
+  "name": "@xingyu.wang/evoskills",
+  "version": "2.1.0",
+  "description": "Evolution Skills CLI for installing and managing openskills-compatible AI skills.",
+  "license": "MIT",
+  "bin": {
+    "evoskills": "./evoskills"
+  },
+  "files": [
+    "evoskills",
+    "README.md",
+    "LICENSE",
+    ".github/AI_CONSTITUTION.md",
+    ".github/EXECUTION_RULES.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xingyu.wang/copilot-evolution-skills.git"
+  }
+}
