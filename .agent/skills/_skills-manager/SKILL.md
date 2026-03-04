@@ -1,131 +1,82 @@
-# 技能：可进化技能库管理器
+---
+name: _skills-manager
+description: Core skill manager for evoskills. Handles skill lifecycle (init, install, remove, update) and skill contributions.
+---
 
-## 概述
+# _skills-manager
 
-用于管理 copilot-evolution-skills 的初始化、安装、更新与贡献流程。
-当用户请求“初始化技能库”“更新技能”“贡献技能”或“检查技能状态”时使用。
+## 📌 Skill Description
 
-## 触发条件
+Manages the complete skill lifecycle in copilot-evolution-skills projects. Works with the evoskills CLI to install, update, and maintain AI skills.
 
-- "初始化技能库" / "init skills"
-- "更新技能" / "update skills"
-- "贡献技能改进" / "contribute skills"
-- "检查技能状态" / "check skills status"
+**Applicable Scenarios**: Initializing projects with skills, installing/removing specific skills, updating skill definitions, contributing skill improvements.
 
-## 执行流程
+**Learning Source**: evoskills CLI workflow and openskills compatibility patterns.
 
-### 1. 初始化技能库
+## 🎯 Core Operations
 
-当用户首次集成技能时：
-
+### Initialize Project
 ```bash
-evoskills init
+evoskills init                    # Install all core skills
+evoskills init --core-only        # Core skills only
+evoskills init --skills a,b,c     # Specific skills
 ```
 
-可选模式：
+Creates `.agent/skills/`, `AGENTS.md`, `.github/AI_CONSTITUTION.md`.
 
+### Install/Remove Skills
 ```bash
-evoskills init --core-only
-evoskills init --skills _git-commit,_pr-creator
+evoskills install _git-commit     # Install optional skill
+evoskills remove _git-commit      # Remove (core skills locked)
+evoskills list --installed        # Show installed skills
 ```
 
-初始化后会创建/维护：
-- `.agent/skills/`（用户项目中的安装目录）
-- `AGENTS.md`（项目根目录技能入口登记）
-- `.github/AI_CONSTITUTION.md`
-- `.github/copilot-instructions.md`
-
-### 2. 更新技能状态
-
-当用户要求更新时：
-
+### Update Skills
 ```bash
-evoskills update
+evoskills update                  # Sync all skills
+evoskills update _git-commit      # Update specific skill
 ```
 
-更新单个技能：
+## ⚡ Critical Path Constraint (v2.0.0+)
+
+- ✅ All skill sources in `.agent/skills/<skill_name>/SKILL.md`
+- ❌ Never use deprecated `skills/` directory
+- ✅ evoskills CLI fetches from `.agent/skills/` via GitHub raw content
+
+## 🔄 Contributing Improvements
+
+When improving a skill:
 
 ```bash
-evoskills update _git-commit
+git checkout -b feat/improve-skill-name
+# Edit .agent/skills/<skill_name>/SKILL.md
+git add .agent/skills/<skill_name>/
+git commit -m "feat(_skill-name): describe improvement"
+git push -u origin feat/improve-skill-name
 ```
 
-说明：不再使用 `setup.sh` / `update.sh` 脚本，也不使用 submodule。
+## 🚀 evoskills CLI Reference
 
-### 3. 安装或卸载技能
+| Command | Purpose |
+|---------|---------|
+| `evoskills init` | Initialize project with skills |
+| `evoskills list` | Show all available skills |
+| `evoskills install <skill>` | Install optional skill |
+| `evoskills remove <skill>` | Remove optional skill |
+| `evoskills update` | Sync all skills to latest |
 
-```bash
-evoskills install _git-commit
-evoskills remove _git-commit
-evoskills list --installed
-```
+## 🧙 Integration with _evolution-core
 
-约束：
-- 核心技能不可卸载
-- 安装来源为仓库 `.agent/skills/`，安装目标为用户项目 `.agent/skills/`（通过 GitHub raw content URL）
+When `_evolution-core` identifies skill improvements:
+1. Locate skill at `.agent/skills/<skill_name>/SKILL.md`
+2. Apply improvements directly to that file
+3. Never create duplicates in other directories
+4. Register changes in `AGENTS.md` if adding new skills
 
-### 4. 贡献技能改进
+## ✅ Pre-Contribution Checklist
 
-当用户希望贡献本地改进时：
-
-```bash
-# 1) 先在仓库中修改 .agent/skills/<skill>/SKILL.md（v2.0.0+ 统一路径）
-git checkout -b feat/update-skill-manager
-
-# 2) 提交改动
-git add .
-git commit -m "docs(skills): improve _skills-manager skill"
-
-# 3) 推送并创建 PR
-git push -u origin feat/update-skill-manager
-```
-
-如果已安装 GitHub CLI：
-
-```bash
-gh pr create --fill
-```
-
-## 常见问题处理
-
-### Q: 旧文档里还在引用 setup.sh / update.sh / contribute.sh 怎么办？
-
-A: 全部替换为 `evoskills init` / `evoskills update` 命令。所有技能管理都通过 evoskills CLI 进行。
-
-### Q: v2.0.0 中为什么所有技能都在 `.agent/skills/` 而没有分离的源目录？
-
-A: v2.0.0 统一了架构，所有技能都在 `.agent/skills/` 中，包括：
-- 源仓库（copilot-evolution-skills）中的技能
-- 用户项目中安装的技能
-
-evoskills CLI 通过 GitHub raw content URL 直接从 `.agent/skills/` 拉取技能，简化了架构。
-
-### Q: 如何确保演进改进应用到正确的路径？
-
-A: `_evolution-core` 技能已被更新，明确要求所有改进必须在 `.agent/skills/<skill>/SKILL.md` 中进行。遵循此约束可避免路径混淆。### Q: 如何检查当前技能安装状态？
-
-```bash
-evoskills list --installed
-cat AGENTS.md
-```
-
-## 最佳实践
-
-- 所有技能统一维护在 `.agent/skills/` 目录（v2.0.0+）
-- 遵循 evoskills CLI 的 GitHub raw content 获取机制
-- 技能入口固定在项目根 `AGENTS.md`
-- 宪法固定在 `.github/AI_CONSTITUTION.md`
-- 所有演进改进必须在 `.agent/skills/<skill>/SKILL.md` 中进行（不使用遗留的 `skills/` 路径）
-
-## 技术说明
-
-- CLI 入口：仓库根 `evoskills`（英文脚本，适合 npm 发布）
-- npm install: `npm install -g @xingyu.wang/evoskills`
-- Alternate: `npm install -g github:xingyu.wang/copilot-evolution-skills`
-
-## 快速参考
-
-- 初始化：`evoskills init`
-- 更新：`evoskills update`
-- 安装技能：`evoskills install <skill>`
-- 卸载技能：`evoskills remove <skill>`
-- 查看已装：`evoskills list --installed`
+- [ ] Skill location is `.agent/skills/<skill_name>/SKILL.md`
+- [ ] SKILL.md content is concise (60-150 lines)
+- [ ] No deprecated `skills/` paths used
+- [ ] AGENTS.md updated if new skills added
+- [ ] PR description includes "What changed" and "Why"

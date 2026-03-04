@@ -25,7 +25,7 @@ Usage notes:
 
 <available_skills>
 
-<!-- Core Skills (5) -->
+<!-- Core Skills (6) -->
 <skill>
 <name>_instruction-guard</name>
 <description>Read and apply directives before processing each request. Enforces instruction hierarchy and prevents instruction conflicts.</description>
@@ -56,7 +56,13 @@ Usage notes:
 <location>project</location>
 </skill>
 
-<!-- Optional Skills (9) -->
+<skill>
+<name>_skills-manager</name>
+<description>Core skill manager for evoskills. Handles skill lifecycle (init, install, remove, update) and skill contributions.</description>
+<location>project</location>
+</skill>
+
+<!-- Optional Skills (8) -->
 <skill>
 <name>_git-commit</name>
 <description>Implement conventional commits workflow. Ensures proper commit message formatting and semantic versioning compliance.</description>
@@ -102,12 +108,6 @@ Usage notes:
 <skill>
 <name>_session-safety</name>
 <description>Prevent state violations and session inconsistencies. Maintains context integrity and prevents conflicting actions.</description>
-<location>project</location>
-</skill>
-
-<skill>
-<name>_skills-manager</name>
-<description>Manage skills lifecycle. Initialize, update, install, and remove skills as needed.</description>
 <location>project</location>
 </skill>
 
