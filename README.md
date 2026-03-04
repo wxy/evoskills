@@ -93,6 +93,12 @@ evoskills update                 # Update CLI (via npm) and refresh all installe
 evoskills update _git-commit     # Update specific skill only
 ```
 
+### npm Release Authentication (GitHub Actions)
+
+- Preferred: **Trusted Publishing (OIDC)**, no token needed
+- Fallback: **Granular access token** stored as `NPM_TOKEN` in GitHub Secrets
+- Note: npm legacy tokens were removed (Nov 2025), so "Automation token" may not appear in UI
+
 ### Use Custom Skill Repository
 
 ```bash

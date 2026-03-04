@@ -43,9 +43,16 @@ jobs:
             echo "already_published=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Publish to npm
-        if: steps.check.outputs.already_published == 'false'
+      - name: Publish to npm (Trusted Publishing via OIDC)
+        if: steps.check.outputs.already_published == 'false' && secrets.NPM_TOKEN == ''
+        run: |
+          echo "Publishing via Trusted Publishing (OIDC), no NPM token required"
+          npm publish --access public --provenance
+
+      - name: Publish to npm (Granular token fallback)
+        if: steps.check.outputs.already_published == 'false' && secrets.NPM_TOKEN != ''
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
+          echo "Publishing via NPM_TOKEN fallback"
           npm publish --access public --provenance
