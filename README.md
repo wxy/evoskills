@@ -186,5 +186,5 @@ MIT © [xingyu.wang](https://github.com/xingyu.wang)
 ## 🔗 Links
 
 - [npm Package](https://www.npmjs.com/package/@xingyu.wang/evoskills)
-- [GitHub Repository](https://github.com/xingyu.wang/copilot-evolution-skills)
+- [GitHub Repository](https://github.com/wxy/evoskills)
 - [Skill Definition Specification](SKILL_DEFINITION_SPECIFICATION.md)

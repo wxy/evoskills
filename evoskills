@@ -12,7 +12,7 @@ AGENTS_DIR=".agent"
 SKILLS_DIR="$AGENTS_DIR/skills"
 
 # Default skill repository
-DEFAULT_SKILLS_REPO="https://github.com/xingyu.wang/copilot-evolution-skills"
+DEFAULT_SKILLS_REPO="https://github.com/wxy/evoskills"
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -74,7 +74,7 @@ Commands:
   --version, -v               Print CLI version
   --help, -h                  Print this help
 
-Default repository: https://github.com/xingyu.wang/copilot-evolution-skills
+Default repository: https://github.com/wxy/evoskills
 
 Notes:
   - Skills are installed to .agent/skills/
