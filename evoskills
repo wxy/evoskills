@@ -90,6 +90,15 @@ ensure_layout() {
   mkdir -p ".github"
 }
 
+github_raw_url() {
+  local repo_url="$1"
+  local path="$2"
+  # Convert https://github.com/user/repo to https://raw.githubusercontent.com/user/repo/main/path
+  local raw_repo
+  raw_repo=$(echo "$repo_url" | sed 's|https://github.com/|https://raw.githubusercontent.com/|' | sed 's|\.git$||')
+  echo "$raw_repo/main/$path"
+}
+
 get_config_value() {
   local key="$1"
 
@@ -138,8 +147,10 @@ create_constitution_if_missing() {
   if [ ! -f ".github/AI_CONSTITUTION.md" ]; then
     local skills_repo
     skills_repo=$(get_config_value "skillsRepo")
+    local raw_url
+    raw_url=$(github_raw_url "$skills_repo" ".github/AI_CONSTITUTION.md")
 
-    if curl -sf "$skills_repo/raw/main/.github/AI_CONSTITUTION.md" > ".github/AI_CONSTITUTION.md" 2>/dev/null; then
+    if curl -sf "$raw_url" > ".github/AI_CONSTITUTION.md" 2>/dev/null; then
       print_success "Downloaded .github/AI_CONSTITUTION.md"
     else
       cat > ".github/AI_CONSTITUTION.md" << 'EOF'
@@ -156,8 +167,10 @@ create_execution_rules_if_missing() {
   if [ ! -f ".github/EXECUTION_RULES.md" ]; then
     local skills_repo
     skills_repo=$(get_config_value "skillsRepo")
+    local raw_url
+    raw_url=$(github_raw_url "$skills_repo" ".github/EXECUTION_RULES.md")
 
-    if curl -sf "$skills_repo/raw/main/.github/EXECUTION_RULES.md" > ".github/EXECUTION_RULES.md" 2>/dev/null; then
+    if curl -sf "$raw_url" > ".github/EXECUTION_RULES.md" 2>/dev/null; then
       print_success "Downloaded .github/EXECUTION_RULES.md"
     else
       print_warn "Could not download execution rules (optional)"
@@ -391,25 +404,35 @@ install_skill_github() {
   mkdir -p "$SKILLS_DIR/$skill"
 
   # Try to download SKILL.md and references from GitHub
-  if curl -sf "$skills_repo/raw/main/.agent/skills/$skill/SKILL.md" > "$SKILLS_DIR/$skill/SKILL.md" 2>/dev/null; then
+  local raw_url
+  raw_url=$(github_raw_url "$skills_repo" ".agent/skills/$skill/SKILL.md")
+  if curl -sf "$raw_url" > "$SKILLS_DIR/$skill/SKILL.md" 2>/dev/null; then
     print_success "Installed skill: $skill"
 
     # Try to download references/ if present
-    if curl -sf "$skills_repo/raw/main/.agent/skills/$skill/references/" &>/dev/null; then
+    local ref_url
+    ref_url=$(github_raw_url "$skills_repo" ".agent/skills/$skill/references/")
+    if curl -sf "$ref_url" &>/dev/null; then
       print_info "Downloading skill references..."
       mkdir -p "$SKILLS_DIR/$skill/references"
       # Download common reference files
       for ref_file in "*.md"; do
-        curl -sf "$skills_repo/raw/main/.agent/skills/$skill/references/$ref_file" > "$SKILLS_DIR/$skill/references/$ref_file" 2>/dev/null || true
+        local ref_file_url
+        ref_file_url=$(github_raw_url "$skills_repo" ".agent/skills/$skill/references/$ref_file")
+        curl -sf "$ref_file_url" > "$SKILLS_DIR/$skill/references/$ref_file" 2>/dev/null || true
       done
     fi
 
     # Try to download scripts/ if present
-    if curl -sf "$skills_repo/raw/main/.agent/skills/$skill/scripts/" &>/dev/null; then
+    local script_url
+    script_url=$(github_raw_url "$skills_repo" ".agent/skills/$skill/scripts/")
+    if curl -sf "$script_url" &>/dev/null; then
       print_info "Downloading skill scripts..."
       mkdir -p "$SKILLS_DIR/$skill/scripts"
       for script_file in "*.sh"; do
-        curl -sf "$skills_repo/raw/main/.agent/skills/$skill/scripts/$script_file" > "$SKILLS_DIR/$skill/scripts/$script_file" 2>/dev/null || true
+        local script_file_url
+        script_file_url=$(github_raw_url "$skills_repo" ".agent/skills/$skill/scripts/$script_file")
+        curl -sf "$script_file_url" > "$SKILLS_DIR/$skill/scripts/$script_file" 2>/dev/null || true
       done
     fi
   else
@@ -461,13 +484,21 @@ cmd_init() {
 
   ensure_layout
 
+  # Initialize config with default repository if not already set
+  local skills_repo
+  if [ -z "$custom_repo" ]; then
+    skills_repo="$DEFAULT_SKILLS_REPO"
+  else
+    skills_repo="$custom_repo"
+  fi
+
   cat > "$PROJECT_CONFIG_FILE" << EOF
 {
   "version": "3.0.0",
   "installedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
   "skillsDir": ".agent/skills",
   "openskillsCompatible": true,
-  "skillsRepo": "$(get_config_value 'skillsRepo')"
+  "skillsRepo": "$skills_repo"
 }
 EOF
 
