@@ -88,6 +88,26 @@ When creating skill `_my-skill`, you only need to declare its tier and dependenc
 
 ---
 
+## Mandatory Initialization Binding
+
+The constitution defines **why** evolution and discipline are required.
+The initialization protocol defines **how** every response is enforced.
+
+### Authority and layering
+
+1. **Constitution** (`.github/AI_CONSTITUTION.md`): immutable evolution principles
+2. **Initialization protocol** (`.github/AI_INITIALIZATION.md`): mandatory 4-phase execution contract
+3. **Instruction entrypoint** (`.github/copilot-instructions.md`): active loading and per-response gate
+4. **Skill definitions** (`.agent/skills/*/SKILL.md`): implementation details
+
+### Compliance contract
+
+- A response is valid only when it satisfies all required initialization markers and checks.
+- If any required phase is missing, execution must stop and resume from the missing phase.
+- Evolution outputs (new rules/skills) must remain compatible with this enforcement chain.
+
+---
+
 ## Glossary
 
 | Term | Definition |
@@ -101,4 +121,4 @@ When creating skill `_my-skill`, you only need to declare its tier and dependenc
 
 > **Version**: 2.1  
 > **Focus**: Evolution mechanism only (lean and focused)  
-> **Related Files**: See `.github/EXECUTION_RULES.md` for mandatory rules, `AGENTS.md` for skill registry
+> **Related Files**: `.github/AI_INITIALIZATION.md`, `.github/copilot-instructions.md`, `AGENTS.md`
