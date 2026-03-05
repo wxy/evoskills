@@ -49,17 +49,17 @@ This will:
 - ✅ Create `.agent/skills/` directory (skills installed from GitHub)
 - ✅ Generate `AGENTS.md` at project root (openskills-compatible skill registry)
 - ✅ Download `.github/AI_CONSTITUTION.md` (core evolution mechanism)
-- ✅ Download `.github/EXECUTION_RULES.md` (optional safety guardrails)
+- ✅ Download `.github/AI_INITIALIZATION.md` (mandatory 4-skill initialization protocol)
 - ✅ Create `.github/copilot-instructions.md` (entry point for the system)
 - ✅ Save configuration to `.evoskills-config.json`
 
-**Three-layer architecture:**
-1. **AI Constitution** - Evolution principles (always active, cannot be disabled)
-2. **Execution Rules** - 4 optional safety guardrails (can be removed if not needed)
+**Architecture:**
+1. **AI Constitution** - Core evolution principles (always active)
+2. **Initialization Protocol** - Mandatory 4-skill execution sequence with verifiable markers
 3. **Skills** - Reusable capabilities with 3 tiers:
-  - Core (2): always installed
-  - Required System (4): safety/runtime baseline
-  - Optional (8): user-selectable workflow skills
+  - Core (2): evolution infrastructure
+  - Required System (4): safety/runtime baseline (enforced by initialization protocol)
+  - Optional (8): user-selectable workflow enhancements
 
 ## 📚 Usage
 
@@ -144,7 +144,7 @@ evoskills intelligently preserves your customizations during updates:
 
 ### copilot-instructions.md Protection
 - New file: Creates standard template with required references
-- Existing file: Checks for `AI_CONSTITUTION.md` and `AGENTS.md` references
+- Existing file: Checks for `AI_CONSTITUTION.md`, `AI_INITIALIZATION.md`, and `AGENTS.md` references
 - Only appends missing references, never overwrites existing content
 
 **Example**: You can safely add your own skill groups to `AGENTS.md` - evoskills updates won't touch them.
