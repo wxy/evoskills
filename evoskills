@@ -3,7 +3,7 @@
 set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-CLI_VERSION="3.0.1"
+CLI_VERSION="3.1.0"
 
 # Project config file (in current directory)
 PROJECT_CONFIG_FILE=".evoskills-config.json"
@@ -522,7 +522,7 @@ cmd_init() {
 
   cat > "$PROJECT_CONFIG_FILE" << EOF
 {
-  "version": "3.0.0",
+  "version": "3.1.0",
   "installedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
   "skillsDir": ".agent/skills",
   "openskillsCompatible": true,

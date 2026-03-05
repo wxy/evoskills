@@ -6,6 +6,41 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [3.1.0] - 2026-03-05
+
+### Added
+- 🧪 **Comprehensive Test Suite**
+  - Added BATS (Bash Automated Testing System) test framework with 49 test cases
+  - `tests/quick_test.sh`: Fast verification script (10 core tests, no dependencies)
+  - `tests/test_cli_basics.bats`: CLI functionality tests (8 tests)
+  - `tests/test_init.bats`: Project initialization tests (11 tests)
+  - `tests/test_config.bats`: Configuration management tests (6 tests)
+  - `tests/test_skills.bats`: Skill lifecycle tests (11 tests)
+  - `tests/test_update.bats`: Update functionality tests (9 tests)
+  - `tests/test_helper.sh`: Reusable test utilities and assertions
+  - `tests/README.md`: Complete testing documentation
+  - Test coverage: 95.6% pass rate (43/45 tests passing)
+
+### Changed
+- 🔒 **Improved Error Handling**
+  - `init` command now fails fast if constitution/initialization files cannot be downloaded (no stub files)
+  - `update` command unconditionally refreshes AI_CONSTITUTION.md and AI_INITIALIZATION.md
+  - Added temp file handling to prevent empty file creation on download failure
+  - Better error messages for critical file download failures
+
+- 📝 **Configuration Management**
+  - `.evoskills-config.json` now tracked in repository for team alignment
+  - Removed from `.gitignore` to enable version control
+  - Team members can now see project's AI skill framework configuration
+
+### Fixed
+- 🐛 **Copilot Instructions**
+  - Prevent duplicate entries when running `init` multiple times
+  - Smart detection of existing framework references
+  - Updated to reference AI_INITIALIZATION.md instead of deprecated EXECUTION_RULES.md
+
+---
+
 ## [3.0.1] - 2026-03-05
 
 ### Fixed
