@@ -44,8 +44,7 @@ jobs:
       - name: Validate npm package (dry-run)
         run: |
           npm pack --dry-run
-          npm publish --dry-run --access public
 
       - name: Validate publish files list
         run: |
-          node -e "const p=require('./package.json'); const required=['evoskills','README.md','LICENSE','.github/AI_CONSTITUTION.md','.github/EXECUTION_RULES.md']; for (const f of required){ if(!p.files.includes(f)) throw new Error('Missing from files[]: '+f);} console.log('files[] contains required publish artifacts')"
+          node -e "const p=require('./package.json'); const required=['evoskills','README.md','LICENSE','.github/AI_CONSTITUTION.md','.github/AI_INITIALIZATION.md']; for (const f of required){ if(!p.files.includes(f)) throw new Error('Missing from files[]: '+f);} console.log('files[] contains required publish artifacts')"

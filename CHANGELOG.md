@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [3.0.0] - 2026-03-05
+
+### Changed
+- 🚀 **Major Version Release**
+  - Bumped package version to `3.0.0`
+  - Synced CLI runtime version to `3.0.0`
+  - Synced generated project config version to `3.0.0`
+
+### Release
+- 📦 Prepared npm release `@xingyu.wang/evoskills@3.0.0`
+
 ## [2.2.0] - 2026-03-05
 
 ### Added

@@ -1,10 +1,10 @@
 {
   "name": "@xingyu.wang/evoskills",
-  "version": "2.2.0",
+  "version": "3.0.0",
   "description": "Evolution Skills CLI for installing and managing openskills-compatible AI skills.",
   "license": "MIT",
   "bin": {
-    "evoskills": "./evoskills"
+    "evoskills": "evoskills"
   },
   "scripts": {
     "version:patch": "npm version patch -m 'chore(release): bump version to %s'",
@@ -17,7 +17,7 @@
     "README.md",
     "LICENSE",
     ".github/AI_CONSTITUTION.md",
-    ".github/EXECUTION_RULES.md"
+    ".github/AI_INITIALIZATION.md"
   ],
   "engines": {
     "node": ">=18"
@@ -27,6 +27,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/wxy/evoskills.git"
+    "url": "git+https://github.com/wxy/evoskills.git"
   }
 }
