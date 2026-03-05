@@ -163,17 +163,22 @@ EOF
   fi
 }
 
-create_execution_rules_if_missing() {
-  if [ ! -f ".github/EXECUTION_RULES.md" ]; then
+create_initialization_if_missing() {
+  if [ ! -f ".github/AI_INITIALIZATION.md" ]; then
     local skills_repo
     skills_repo=$(get_config_value "skillsRepo")
     local raw_url
-    raw_url=$(github_raw_url "$skills_repo" ".github/EXECUTION_RULES.md")
+    raw_url=$(github_raw_url "$skills_repo" ".github/AI_INITIALIZATION.md")
 
-    if curl -sf "$raw_url" > ".github/EXECUTION_RULES.md" 2>/dev/null; then
-      print_success "Downloaded .github/EXECUTION_RULES.md"
+    if curl -sf "$raw_url" > ".github/AI_INITIALIZATION.md" 2>/dev/null; then
+      print_success "Downloaded .github/AI_INITIALIZATION.md"
     else
-      print_warn "Could not download execution rules (optional)"
+      cat > ".github/AI_INITIALIZATION.md" << 'EOF'
+# AI Initialization Protocol
+
+Please sync the latest AI_INITIALIZATION.md from the evoskills repository.
+EOF
+      print_warn "Could not download initialization protocol; created placeholder"
     fi
   fi
 }
@@ -503,7 +508,7 @@ cmd_init() {
 EOF
 
   create_constitution_if_missing
-  create_execution_rules_if_missing
+  create_initialization_if_missing
   create_copilot_instructions_if_missing
 
   print_info "Installing core skills..."
@@ -632,7 +637,7 @@ cmd_update() {
 
   ensure_layout
   create_constitution_if_missing
-  create_execution_rules_if_missing
+  create_initialization_if_missing
   create_copilot_instructions_if_missing
 
   if [ -n "$skill" ]; then
