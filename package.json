@@ -6,6 +6,12 @@
   "bin": {
     "evoskills": "./evoskills"
   },
+  "scripts": {
+    "version:patch": "npm version patch -m 'chore(release): bump version to %s'",
+    "version:minor": "npm version minor -m 'chore(release): bump version to %s'",
+    "version:major": "npm version major -m 'chore(release): bump version to %s'",
+    "postversion": "git push origin main --tags"
+  },
   "files": [
     "evoskills",
     "README.md",
