@@ -143,22 +143,45 @@ set_config_value() {
   print_success "Config saved: $key = $value"
 }
 
+# Download file from GitHub with strict error handling
+# Usage: github_download <skills_repo> <file_path> <output_file> <allow_stub>
+# allow_stub: if 'true', fail fast on error; if 'false', skip on error
+github_download() {
+  local skills_repo="$1"
+  local file_path="$2"
+  local output_file="$3"
+  local allow_stub="$4"
+  local raw_url
+  local temp_file
+  
+  raw_url=$(github_raw_url "$skills_repo" "$file_path")
+  temp_file=$(mktemp)
+  
+  if curl -sf "$raw_url" > "$temp_file" 2>/dev/null; then
+    mv "$temp_file" "$output_file"
+    print_success "Downloaded $file_path"
+    return 0
+  else
+    rm -f "$temp_file"
+    if [ "$allow_stub" = "true" ]; then
+      print_error "Failed to download $file_path from $skills_repo"
+      print_error "Cannot initialize project without critical files"
+      return 1
+    else
+      print_warn "Could not download $file_path; skipping update"
+      return 2
+    fi
+  fi
+}
+
 create_constitution_if_missing() {
   if [ ! -f ".github/AI_CONSTITUTION.md" ]; then
     local skills_repo
     skills_repo=$(get_config_value "skillsRepo")
-    local raw_url
-    raw_url=$(github_raw_url "$skills_repo" ".github/AI_CONSTITUTION.md")
-
-    if curl -sf "$raw_url" > ".github/AI_CONSTITUTION.md" 2>/dev/null; then
-      print_success "Downloaded .github/AI_CONSTITUTION.md"
-    else
-      cat > ".github/AI_CONSTITUTION.md" << 'EOF'
-# AI Constitution
-
-Please add your project constitution here or configure the skills repository URL.
-EOF
-      print_warn "Could not download constitution; created minimal .github/AI_CONSTITUTION.md"
+    github_download "$skills_repo" ".github/AI_CONSTITUTION.md" ".github/AI_CONSTITUTION.md" "true"
+    if [ $? -ne 0 ]; then
+      print_error "AI_CONSTITUTION.md is required for initialization"
+      exit 1
     fi
   fi
 }
@@ -167,19 +190,41 @@ create_initialization_if_missing() {
   if [ ! -f ".github/AI_INITIALIZATION.md" ]; then
     local skills_repo
     skills_repo=$(get_config_value "skillsRepo")
-    local raw_url
-    raw_url=$(github_raw_url "$skills_repo" ".github/AI_INITIALIZATION.md")
-
-    if curl -sf "$raw_url" > ".github/AI_INITIALIZATION.md" 2>/dev/null; then
-      print_success "Downloaded .github/AI_INITIALIZATION.md"
-    else
-      cat > ".github/AI_INITIALIZATION.md" << 'EOF'
-# AI Initialization Protocol
-
-Please sync the latest AI_INITIALIZATION.md from the evoskills repository.
-EOF
-      print_warn "Could not download initialization protocol; created placeholder"
+    github_download "$skills_repo" ".github/AI_INITIALIZATION.md" ".github/AI_INITIALIZATION.md" "true"
+    if [ $? -ne 0 ]; then
+      print_error "AI_INITIALIZATION.md is required for initialization"
+      exit 1
     fi
+  fi
+}
+
+update_constitution() {
+  local skills_repo
+  skills_repo=$(get_config_value "skillsRepo")
+  local raw_url
+  raw_url=$(github_raw_url "$skills_repo" ".github/AI_CONSTITUTION.md")
+  
+  if curl -sf "$raw_url" > ".github/AI_CONSTITUTION.md" 2>/dev/null; then
+    print_success "Updated .github/AI_CONSTITUTION.md"
+    return 0
+  else
+    print_warn "Could not update .github/AI_CONSTITUTION.md from remote"
+    return 1
+  fi
+}
+
+update_initialization() {
+  local skills_repo
+  skills_repo=$(get_config_value "skillsRepo")
+  local raw_url
+  raw_url=$(github_raw_url "$skills_repo" ".github/AI_INITIALIZATION.md")
+  
+  if curl -sf "$raw_url" > ".github/AI_INITIALIZATION.md" 2>/dev/null; then
+    print_success "Updated .github/AI_INITIALIZATION.md"
+    return 0
+  else
+    print_warn "Could not update .github/AI_INITIALIZATION.md from remote"
+    return 1
   fi
 }
 
@@ -195,10 +240,10 @@ applyTo: "**"
 Please read and follow the AI evolution principle:
 - `.github/AI_CONSTITUTION.md` - Core evolution mechanism (always active, cannot be disabled)
 
-## Optional Execution Rules
+## Mandatory Initialization Protocol
 
-For additional safety guardrails, see:
-- `.github/EXECUTION_RULES.md` - 4 optional rules (can be disabled if not needed for your use case)
+For enforced execution sequence:
+- `.github/AI_INITIALIZATION.md` - 4-skill initialization protocol (mandatory before each response)
 
 ## Skills Registry
 
@@ -211,41 +256,19 @@ For available skills and how they work:
 EOF
     print_success "Created .github/copilot-instructions.md"
   else
-    # Check if file already contains required references
-    local has_constitution=false
-    local has_execution=false
-    local has_agents=false
-    
-    if grep -q "AI_CONSTITUTION.md" ".github/copilot-instructions.md"; then
-      has_constitution=true
-    fi
-    
-    if grep -q "EXECUTION_RULES.md" ".github/copilot-instructions.md"; then
-      has_execution=true
-    fi
-    
-    if grep -q "AGENTS.md" ".github/copilot-instructions.md"; then
-      has_agents=true
-    fi
-    
-    # Append missing references
-    if [ "$has_constitution" = false ] || [ "$has_execution" = false ] || [ "$has_agents" = false ]; then
+    # Check if copilot-instructions already has evoskills entries
+    if ! grep -q "AI_CONSTITUTION.md" ".github/copilot-instructions.md" && \
+       ! grep -q "AI_INITIALIZATION.md" ".github/copilot-instructions.md" && \
+       ! grep -q "AGENTS.md" ".github/copilot-instructions.md"; then
+      # Only add if none of the evoskills references exist
       echo "" >> ".github/copilot-instructions.md"
-      echo "<!-- evoskills: auto-generated references -->" >> ".github/copilot-instructions.md"
-      
-      if [ "$has_constitution" = false ]; then
-        echo "- Please read and follow AI_CONSTITUTION.md (core evolution mechanism)" >> ".github/copilot-instructions.md"
-      fi
-      
-      if [ "$has_execution" = false ]; then
-        echo "- See EXECUTION_RULES.md for optional safety guardrails" >> ".github/copilot-instructions.md"
-      fi
-      
-      if [ "$has_agents" = false ]; then
-        echo "- Refer to AGENTS.md for skills registry" >> ".github/copilot-instructions.md"
-      fi
-      
-      print_success "Updated .github/copilot-instructions.md with evoskills references"
+      echo "## Embedded AI Skills Framework" >> ".github/copilot-instructions.md"
+      echo "" >> ".github/copilot-instructions.md"
+      echo "This project uses evoskills for AI-assisted development:" >> ".github/copilot-instructions.md"
+      echo "- `.github/AI_CONSTITUTION.md` - Core evolution mechanism (always active)" >> ".github/copilot-instructions.md"
+      echo "- `.github/AI_INITIALIZATION.md` - Mandatory 4-skill initialization protocol" >> ".github/copilot-instructions.md"
+      echo "- `AGENTS.md` - Skill registry (core, required system, and optional skills)" >> ".github/copilot-instructions.md"
+      print_success "Updated .github/copilot-instructions.md with evoskills framework"
     fi
   fi
 }
@@ -511,6 +534,7 @@ EOF
   create_initialization_if_missing
   create_copilot_instructions_if_missing
 
+  print_success "Core framework files downloaded and verified"
   print_info "Installing core skills..."
   for skill in "${CORE_SKILLS[@]}"; do
     install_skill_github "$skill"
@@ -636,8 +660,8 @@ cmd_update() {
   fi
 
   ensure_layout
-  create_constitution_if_missing
-  create_initialization_if_missing
+  update_constitution
+  update_initialization
   create_copilot_instructions_if_missing
 
   if [ -n "$skill" ]; then
