@@ -6,6 +6,45 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [2.2.0] - 2026-03-05
+
+### Added
+- ✨ **Mandatory 4-Skill Initialization Protocol**
+  - New `AI_INITIALIZATION.md` defining fail-closed execution sequence
+  - Enforces 4 system skills on every AI response with verifiable markers
+  - Pre-send gate checklist prevents incomplete responses
+- ✅ **Verifiable Output Markers**
+  - `✨ 已启用上下文校验` - Indicates protocol is active
+  - `尊敬的主人：` - Standalone salutation for professionalism
+  - Diff-formatted footer with repository status and skill list
+  - Anti-fake-list enforcement prevents hallucinated items
+- 📋 **Version Management Scripts**
+  - `npm run version:patch|minor|major` - Automated version bumping
+  - `postversion` hook auto-pushes commits and tags to origin/main
+
+### Enhanced
+- 🔍 **_execution-precheck Skill**
+  - 6-step self-check process with truthfulness test (#5)
+  - Prevents self-deception by requiring honest assessment
+  - Validates all 4 phases complete before response generation
+- 📝 **_context-ack Skill**
+  - Diff-formatted footer using syntax highlighting
+  - Anti-fake-list rules with verification checklist
+  - Repository status display (branch, uncommitted, untracked)
+- 📚 **AI_CONSTITUTION.md**
+  - Binding of initialization protocol as Layer 2 authority
+  - Evolution infrastructure documentation
+  - Skill modularity principles
+
+### Removed
+- 🗑️ **EXECUTION_RULES.md** - Deprecated, replaced by stronger AI_INITIALIZATION.md
+  - Old optional guardrails superseded by mandatory protocol
+
+### Impact
+**Quality Improvement**: Every AI response now guaranteed to follow 4-phase initialization, with verifiable markers preventing skill hallucination and false lists.
+
+---
+
 ## [2.1.0] - 2026-03-04
 
 ### Changed
