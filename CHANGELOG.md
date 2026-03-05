@@ -9,13 +9,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [3.0.0] - 2026-03-05
 
 ### Changed
-- 🚀 **Major Version Release**
-  - Bumped package version to `3.0.0`
-  - Synced CLI runtime version to `3.0.0`
-  - Synced generated project config version to `3.0.0`
+- 🏢 **Repository and Package Alignment**
+  - Unified repository URL to `https://github.com/wxy/evoskills`
+  - Updated all documentation and references to reflect canonical repository location
+  - Fixed package.json repository URL format (`git+https://github.com/wxy/evoskills.git`)
+  - Corrected npm bin path format from `./evoskills` to `evoskills`
+
+### Fixed
+- 🔧 **Release Infrastructure**
+  - Synced CLI_VERSION to `3.0.0` in evoskills script
+  - Updated CI validation to check AI_INITIALIZATION.md instead of deprecated EXECUTION_RULES.md
+  - Fixed npm publish files list to include AI_INITIALIZATION.md
+  - Removed npm publish dry-run from CI to prevent false failures
+  - Aligned project config version generation to `3.0.0`
 
 ### Release
-- 📦 Prepared npm release `@xingyu.wang/evoskills@3.0.0`
+- 📦 Official npm release `@xingyu.wang/evoskills@3.0.0`
+- 🔗 Canonical repository: https://github.com/wxy/evoskills
 
 ## [2.2.0] - 2026-03-05
 
