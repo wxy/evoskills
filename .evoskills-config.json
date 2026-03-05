@@ -1,0 +1,37 @@
+{
+  "skillsRepo": "https://github.com/wxy/evoskills",
+  "initialized": true,
+  "skills": [
+    {
+      "name": "_evolution-core",
+      "version": "1.0.0",
+      "tier": "core"
+    },
+    {
+      "name": "_skills-manager",
+      "version": "1.0.0",
+      "tier": "core"
+    },
+    {
+      "name": "_instruction-guard",
+      "version": "1.0.0",
+      "tier": "required-system"
+    },
+    {
+      "name": "_context-ack",
+      "version": "1.0.0",
+      "tier": "required-system"
+    },
+    {
+      "name": "_file-output-guard",
+      "version": "1.0.0",
+      "tier": "required-system"
+    },
+    {
+      "name": "_execution-precheck",
+      "version": "1.0.0",
+      "tier": "required-system"
+    }
+  ],
+  "description": "evoskills 配置文件 - 定义团队所使用的 AI 技能框架"
+}
