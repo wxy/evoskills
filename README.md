@@ -181,7 +181,7 @@ gh pr create --fill
 
 ## 📄 License
 
-MIT © [xingyu.wang](https://github.com/xingyu.wang)
+MIT © [wxy](https://github.com/wxy)
 
 ## 🔗 Links
 

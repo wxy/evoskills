@@ -7,7 +7,7 @@
 ```bash
 npm install -g @xingyu.wang/evoskills
 # Or from GitHub:
-npm install -g github:xingyu.wang/copilot-evolution-skills
+npm install -g github:wxy/evoskills
 ```
 
 ## 2) 在目标项目初始化
