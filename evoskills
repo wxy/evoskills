@@ -3,7 +3,7 @@
 set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-CLI_VERSION="3.0.0"
+CLI_VERSION="3.0.1"
 
 # Project config file (in current directory)
 PROJECT_CONFIG_FILE=".evoskills-config.json"

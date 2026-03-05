@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [3.0.1] - 2026-03-05
+
+### Fixed
+- 🐛 **GitHub Raw Content URL Format**
+  - Fixed incorrect GitHub raw URL format (`github.com/raw/main` → `raw.githubusercontent.com`)
+  - Added `github_raw_url()` helper function for proper URL conversion
+  - `evoskills init` now successfully downloads skills, constitution, and references
+- 🐛 **Configuration Initialization**
+  - Fixed `skillsRepo` empty value in generated config file
+  - `cmd_init` now properly sets default repository before config file creation
+- 🐛 **Deprecated File Handling**
+  - Replaced deprecated `EXECUTION_RULES.md` download with `AI_INITIALIZATION.md`
+  - Renamed `create_execution_rules_if_missing()` to `create_initialization_if_missing()`
+  - AI initialization protocol now properly downloaded during init and update
+
+### Impact
+**User-Facing**: `evoskills init` command now works without errors and properly downloads all required files and skills.
+
+---
+
 ## [3.0.0] - 2026-03-05
 
 ### Changed
