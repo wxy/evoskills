@@ -6,7 +6,21 @@
 
 测试套件使用 **BATS (Bash Automated Testing System)** 框架，为 bash 脚本提供清晰的测试语法。
 
-### 测试覆盖范围
+## 文件清单
+
+| 文件 | 用途 |
+|------|------|
+| `quick_test.sh` | ⚡ **快速验证脚本**（推荐） - 10 个核心测试，无外部依赖 |
+| `run_tests.sh` | 完整 BATS 测试运行器 |
+| `test_helper.sh` | 测试辅助函数和断言库 |
+| `test_cli_basics.bats` | CLI 基本功能（8 个测试） |
+| `test_init.bats` | 项目初始化（11 个测试） |
+| `test_config.bats` | 配置管理（6 个测试） |
+| `test_skills.bats` | 技能生命周期（11 个测试） |
+| `test_update.bats` | 更新功能（10 个测试） |
+| `README.md` | 本文件 |
+
+### 测试覆盖
 
 | 文件 | 测试内容 | 测试用例数 |
 |------|--------|---------|
@@ -21,7 +35,7 @@
 
 ### 前置要求
 
-1. **BATS** (Bash Automated Testing System)
+1. **BATS** (Bash Automated Testing System) - 可选
    ```bash
    # macOS
    brew install bats-core
@@ -39,7 +53,33 @@
    bash --version
    ```
 
-### 运行测试
+### 快速验证（推荐）
+
+使用无需依赖的快速测试验证核心功能：
+```bash
+./tests/quick_test.sh
+```
+
+**输出示例：**
+```
+evoskills Quick Verification
+==============================
+
+[1] Version command work ... ✓
+[2] Help command works ... ✓
+[3] Script is executable ... ✓
+[4] Init creates structure ... ✓
+[5] Constitution file downloaded ... ✓
+...
+Tests: 10 total
+  Passed: 10
+  Failed: 0
+✅ All tests passed!
+```
+
+### 完整测试套件（BATS）
+
+运行完整的 49 个测试用例：
 
 **所有测试：**
 ```bash
